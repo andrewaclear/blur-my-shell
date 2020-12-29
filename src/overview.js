@@ -35,6 +35,12 @@ const ANIMATION_DURATION = 200;
 let sigma = 30;
 let brightness = 0.6;
 
+let SavedshadeBackgrounds;
+
+function init() {
+	this.SavedshadeBackgrounds = Main.overview._shadeBackgrounds;
+}
+
 var OverviewBlur = class OverviewBlur {
     constructor(connections) {
         this.connections = connections;
@@ -44,20 +50,22 @@ var OverviewBlur = class OverviewBlur {
         this._log("blurring overview");
 
         // FIXME GNOME shell bug here: changing opacity to an inferior level does not update the opacity
-        Main.overview._shadeBackgrounds = function () {
-            this._backgroundGroup.get_children().forEach((background) => {
-                if (ANIMATE_OVERVIEW) {
-                    background.opacity = 0;
-                    background.ease_property('opacity', 255, {
-                        duration: ANIMATION_DURATION,
-                        mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-                    });
-                } else {
-                    background.opacity = 255;
-                }
-            })
+        // Main.overview._shadeBackgrounds = function () {
+        //     this._backgroundGroup.get_children().forEach((background) => {
+        //         if (ANIMATE_OVERVIEW) {
+        //             background.opacity = 0;
+        //             background.ease_property('opacity', 255, {
+        //                 duration: ANIMATION_DURATION,
+        //                 mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+        //             });
+        //         } else {
+        //             background.opacity = 255;
+        //         }
+        //     })
 
-        }
+        // }
+
+        Main.overview._shadeBackgrounds = function() {};
 
         Main.overview._unshadeBackgrounds = function () {
             this._backgroundGroup.get_children().forEach((background) => {
@@ -110,11 +118,15 @@ var OverviewBlur = class OverviewBlur {
     disable() {
         this._log("removing blur from overview");
 
-        Main.overview._shadeBackgrounds = old_shadeBackgrounds;
+        Main.overview._shadeBackgrounds = this.SavedshadeBackgrounds;
+
+        // Main.overview._shadeBackgrounds = old_shadeBackgrounds;
         Main.overview._unshadeBackgrounds = old_unshadeBackgrounds;
         Main.overview._updateBackgrounds = old_updateBackgrounds;
 
         Main.overview._updateBackgrounds();
+
+
     }
 
     _log(str) {
